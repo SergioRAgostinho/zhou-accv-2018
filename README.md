@@ -4,6 +4,7 @@ A Python 3 implementation of the absolute pose estimation method for minimal con
 
 > Lipu Zhou, Jiamin Ye, and Michael Kaess. A Stable Algebraic Camera Pose Estimation for Minimal Configurations of 2D/3D Point and Line Correspondences. In Asian Conference on Computer Vision, 2018.
 
+The methods implemented are able to address 4 modalities of minimal problems, namely: perspective-3-points (P3P), perspective-2-points-1-line (P2P1L), perspective-1-point-2-lines (P1P2L) and perspective-3-lines (P3L).
 This package also includes an implementation the robustified version of Kukelova et al. E3Q3 method presented in
 
 
@@ -23,6 +24,10 @@ Clone this repo and invoke from its root folder
 ```
 python setup.py install
 ```
+
+## Examples
+
+The library exposes 5 public functions: `p3p`, `p3l`, `p2p1l`, `p1p2l`, and `e3q3`. You can find a couple of examples showing how to use each in the [examples folder](https://github.com/SergioRAgostinho/zhou-accv-2018/blob/master/examples).
 
 ## Interesting Facts
 

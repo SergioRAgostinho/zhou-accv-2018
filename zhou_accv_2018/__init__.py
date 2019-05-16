@@ -10,14 +10,17 @@ from Zhou et al. at ACCV 2018.
 __version__ = "1.0.0"
 
 
-def _re3q3(A, q_ref=None):
+def _re3q3(A, q_ref=None, allow_imag_roots=False):
     """Robust E3Q3 is a robust implementation of "Efficient Intersection of Three Quadrics
     and Applications in Computer Viion" (E3Q3) by Kukelova et al. as suggested in the paper
     "Minimal Solution of 2D/3D Point and Line Correspondences" by Zhou et al.
 
     A - the 3x10 coefficient matrix
     q_ref - a reference quaternion [w, x, y, z], to perform the coefficient swap for
-    increased stability
+    increased stability. Default: None
+    allow_imag_roots - allows imaginary roots (solutions) by only considering
+    their real part. Recommended to set to True under noise conditions.
+    Default: False
     """
 
     ## Permutations to solve the inversion problem of the w = 0 quaternion coefficient
@@ -70,7 +73,7 @@ def _re3q3(A, q_ref=None):
     A_r = (A_r.T)[[0, 1, 2, 4, 5, 7, 6, 8, 9, 3]].T
 
     # Invoke the E3Q3
-    a, b, c = e3q3(A_r)
+    a, b, c = e3q3(A_r, allow_imag_roots)
 
     # Retrieve quaternion's coefficients
     w = np.sqrt(1 / (a * a + b * b + c * c + 1))  # there was mistake here :D it's w2
@@ -286,7 +289,7 @@ def _re3q3_line_constraints(line_2d, line_3d, K):
     return (cl1, cl2), n_li
 
 
-def p3p(pts_2d, pts_3d, K, q_ref=None):
+def p3p(pts_2d, pts_3d, K, q_ref=None, allow_imag_roots=False):
     """An implementation of the ... problem from "A Stable Algebraic Camera
     Pose Estimation for Minimal Configurations of 2D/3D Point and Line Correspondences",
     from Zhou et al. at ACCV 2018.
@@ -297,6 +300,9 @@ def p3p(pts_2d, pts_3d, K, q_ref=None):
     pts_3d - the corresponding points in 3D
     K - the intrinsics matrix of the camera
     q_ref - [w, x, y, z] an initial coarse estimate of the rotation to improve robustness
+    allow_imag_roots - allows imaginary roots (solutions) by only considering
+    their real part. Recommended to set to True under noise conditions.
+    Default: False
     """
 
     # Extract point constraints
@@ -310,7 +316,7 @@ def p3p(pts_2d, pts_3d, K, q_ref=None):
     A = C1 - N1 @ N2_inv @ C2
 
     # Invoke the modified re3q3
-    R, r = _re3q3(A=A, q_ref=q_ref)
+    R, r = _re3q3(A=A, q_ref=q_ref, allow_imag_roots=allow_imag_roots)
 
     # Getting the translation components back
     t = -(N2_inv @ C2 @ r.T).T
@@ -319,7 +325,7 @@ def p3p(pts_2d, pts_3d, K, q_ref=None):
     return list(zip(R, t))
 
 
-def p2p1l(pts_2d, line_2d, pts_3d, line_3d, K, q_ref=None):
+def p2p1l(pts_2d, line_2d, pts_3d, line_3d, K, q_ref=None, allow_imag_roots=False):
     """An implementation of the ... problem from "A Stable Algebraic Camera
     Pose Estimation for Minimal Configurations of 2D/3D Point and Line Correspondences",
     from Zhou et al. at ACCV 2018.
@@ -333,6 +339,9 @@ def p2p1l(pts_2d, line_2d, pts_3d, line_3d, K, q_ref=None):
     in 3d space and second a direction in 3D.
     K - the intrinsics matrix of the camera
     q_ref - [w, x, y, z] an initial coarse estimate of the rotation to improve robustness
+    allow_imag_roots - allows imaginary roots (solutions) by only considering
+    their real part. Recommended to set to True under noise conditions.
+    Default: False
 
     All direction are assumed to be normalized.
     """
@@ -351,7 +360,7 @@ def p2p1l(pts_2d, line_2d, pts_3d, line_3d, K, q_ref=None):
     A = np.vstack((cl1, C1 - N1 @ N2_inv @ C2))
 
     # Invoke the modified re3q3
-    R, r = _re3q3(A=A, q_ref=q_ref)
+    R, r = _re3q3(A=A, q_ref=q_ref, allow_imag_roots=allow_imag_roots)
 
     # Getting the translation components back
     t = -(N2_inv @ C2 @ r.T).T
@@ -360,7 +369,7 @@ def p2p1l(pts_2d, line_2d, pts_3d, line_3d, K, q_ref=None):
     return list(zip(R, t))
 
 
-def p1p2l(pts_2d, line_2d, pts_3d, line_3d, K, q_ref=None):
+def p1p2l(pts_2d, line_2d, pts_3d, line_3d, K, q_ref=None, allow_imag_roots=False):
     """An implementation of the ... problem from "A Stable Algebraic Camera
     Pose Estimation for Minimal Configurations of 2D/3D Point and Line Correspondences",
     from Zhou et al. at ACCV 2018.
@@ -374,6 +383,9 @@ def p1p2l(pts_2d, line_2d, pts_3d, line_3d, K, q_ref=None):
     in 3d space and second the directions in 3D.
     K - the intrinsics matrix of the camera
     q_ref - [w, x, y, z] an initial coarse estimate of the rotation to improve robustness
+    allow_imag_roots - allows imaginary roots (solutions) by only considering
+    their real part. Recommended to set to True under noise conditions.
+    Default: False
 
     All direction are assumed to be normalized.
     """
@@ -394,7 +406,7 @@ def p1p2l(pts_2d, line_2d, pts_3d, line_3d, K, q_ref=None):
     A = np.vstack((cl1, c1 - n1 @ N2_inv @ C2))
 
     # Invoke the modified re3q3
-    R, r = _re3q3(A=A, q_ref=q_ref)
+    R, r = _re3q3(A=A, q_ref=q_ref, allow_imag_roots=allow_imag_roots)
 
     # Getting the translation components back
     t = -(N2_inv @ C2 @ r.T).T
@@ -403,7 +415,7 @@ def p1p2l(pts_2d, line_2d, pts_3d, line_3d, K, q_ref=None):
     return list(zip(R, t))
 
 
-def p3l(line_2d, line_3d, K, q_ref=None):
+def p3l(line_2d, line_3d, K, q_ref=None, allow_imag_roots=False):
     """An implementation of the ... problem from "A Stable Algebraic Camera
     Pose Estimation for Minimal Configurations of 2D/3D Point and Line Correspondences",
     from Zhou et al. at ACCV 2018.
@@ -415,7 +427,9 @@ def p3l(line_2d, line_3d, K, q_ref=None):
     in 3d space and the second a directions in 3D.
     K - the intrinsics matrix of the camera
     q_ref - [w, x, y, z] an initial coarse estimate of the rotation to improve robustness
-
+    allow_imag_roots - allows imaginary roots (solutions) by only considering
+    their real part. Recommended to set to True under noise conditions.
+    Default: False
     """
 
     ## Compose block matrices for the equation system
@@ -425,7 +439,7 @@ def p3l(line_2d, line_3d, K, q_ref=None):
     (A, C2), N2 = _re3q3_line_constraints(line_2d, line_3d, K)
 
     # Invoke the modified re3q3
-    R, r = _re3q3(A=A, q_ref=q_ref)
+    R, r = _re3q3(A=A, q_ref=q_ref, allow_imag_roots=allow_imag_roots)
 
     # Getting the translation components back
     t = -np.linalg.solve(N2, C2 @ r.T).T

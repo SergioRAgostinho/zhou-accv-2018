@@ -3,7 +3,7 @@ import numpy as np
 from .e3q3c import coefficients
 
 
-def e3q3(A):
+def e3q3(A, allow_imag_roots=False):
     """Robust E3Q3 is a robust implementation of "Efficient Intersection of Three Quadrics
     and Applications in Computer Vision" (E3Q3) by Kukelova et al. as suggested in the paper
     "Minimal Solution of 2D/3D Point and Line Correspondences" by Zhou et al.
@@ -12,6 +12,9 @@ def e3q3(A):
 
     A - the 3x10 coefficient matrix, with A @ z = 0 and assuming a quadratic structure
     of z = [a**2, b**2, c**2, ab, ac, bc, a, b, c, 1]
+    allow_imag_roots - allows imaginary roots (solutions) by only considering
+    their real part. Recommended to set to True under noise conditions.
+    Default: False
     """
 
     ## Permutations to solve the inversion problem of Matrix H
@@ -119,12 +122,8 @@ def e3q3(A):
     # coeffs = (c8, c7, c6, c5, c4, c3, c2, c1, c0))
     roots = np.roots(coeffs)
 
-    # retain only real solutions of a
-    # this renders solutions useless under noise so we simply return the real part
-    # and let the user filter out the solutions
-    a = np.real(roots[np.isreal(roots)])
-    print(roots)
-    # a = np.real(roots)
+    # filter out roots
+    a = np.real(roots) if allow_imag_roots else np.real(roots[np.isreal(roots)])
 
     # In here we actually show how to build the homogeneous system from before
     # now that we know a
