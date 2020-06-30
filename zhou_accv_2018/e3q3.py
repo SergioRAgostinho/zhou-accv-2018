@@ -8,8 +8,6 @@ def e3q3(A, allow_imag_roots=False):
     and Applications in Computer Vision" (E3Q3) by Kukelova et al. as suggested in the paper
     "Minimal Solution of 2D/3D Point and Line Correspondences" by Zhou et al.
 
-    So far only really useful when used from p2p1l and variants.
-
     A - the 3x10 coefficient matrix, with A @ z = 0 and assuming a quadratic structure
     of z = [a**2, b**2, c**2, ab, ac, bc, a, b, c, 1]
     allow_imag_roots - allows imaginary roots (solutions) by only considering
@@ -57,6 +55,8 @@ def e3q3(A, allow_imag_roots=False):
             min_idx = i
 
     # Pick the final permutation
+    if min_idx is None:
+        raise ValueError("Matrix A is ill-conditioned")
     A_r = (A.T)[perms[min_idx]]
     H = A_r[[1, 2, 5]].T
 
